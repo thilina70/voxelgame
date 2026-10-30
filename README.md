@@ -1,1 +1,65 @@
-# voxelgame
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VOXEL - My Game</title>
+</head>
+<body style="background:#000;color:#fff;max-width:420px;margin:0 auto;font-family:sans-serif;padding-bottom:80px">
+
+<div id="wallet">
+<div style="background:radial-gradient(ellipse at top,#2a1a4a 0%,#000 70%);padding:30px 20px;text-align:center">
+<div style="font-size:56px;font-weight:900"><span style="color:#555">$</span>0.00</div>
+<div style="display:flex;justify-content:space-between;margin-top:28px">
+<div style="text-align:center"><div style="width:56px;height:56px;background:#1a1a1a;border-radius:50%;display:flex;align-items:center;justify-content:center">↓</div><div style="font-size:11px;margin-top:6px;color:#aaa">Deposit</div></div>
+<div style="text-align:center"><div style="width:56px;height:56px;background:#1a1a1a;border-radius:50%;display:flex;align-items:center;justify-content:center">↑</div><div style="font-size:11px;margin-top:6px;color:#aaa">Withdraw</div></div>
+<div style="text-align:center"><div style="width:56px;height:56px;background:#1a1a1a;border-radius:50%;display:flex;align-items:center;justify-content:center">⇄</div><div style="font-size:11px;margin-top:6px;color:#aaa">Exchange</div></div>
+<div style="text-align:center"><div style="width:56px;height:56px;background:#1a1a1a;border-radius:50%;display:flex;align-items:center;justify-content:center">🕐</div><div style="font-size:11px;margin-top:6px;color:#aaa">History</div></div>
+</div>
+</div>
+<div style="padding:20px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;justify-content:space-between;align-items:center"><div style="display:flex;gap:12px;align-items:center"><div style="width:40px;height:40px;background:#222;border-radius:10px;display:flex;align-items:center;justify-content:center">⬢</div><div><div style="font-weight:bold">VOXEL</div><div style="font-size:12px;color:#777">0 VOXEL</div></div></div><div style="text-align:right"><div style="font-weight:bold">$0.00</div><div style="font-size:12px;color:#777">$0.000077</div></div></div>
+
+<div style="display:flex;justify-content:space-between;align-items:center"><div style="display:flex;gap:12px;align-items:center"><div style="width:40px;height:40px;background:#0098EA;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900">T</div><div><div style="font-weight:bold">TON <span style="font-size:9px;background:#0f0;color:#000;padding:2px 5px;border-radius:10px;margin-left:4px">LIVE</span></div><div style="font-size:12px;color:#777">0 TON</div></div></div><div style="text-align:right"><div style="font-weight:bold">$0.00</div><div id="ton-price" style="font-size:12px;color:#0f0">Loading...</div></div></div>
+
+<div style="display:flex;justify-content:space-between;align-items:center"><div style="display:flex;gap:12px;align-items:center"><div style="font-size:28px;width:40px;text-align:center">⭐</div><div><div style="font-weight:bold">STARS</div><div style="font-size:12px;color:#777">0 STARS</div></div></div><div style="text-align:right"><div style="font-weight:bold">$0.00</div><div style="font-size:12px;color:#777">$0.013</div></div></div>
+</div>
+</div>
+
+<div id="build" style="display:none">
+<div style="padding:20px;text-align:center"><div style="background:#a3ff12;color:#000;padding:8px 24px;border-radius:20px;font-weight:900;display:inline-block;font-size:14px">PHASE 1 STARTED</div><div style="margin-top:20px;border:1px solid #333;border-radius:30px;padding:12px 18px;display:flex;align-items:center;gap:10px;justify-content:center;background:#111"><span>⭐</span><b style="font-size:22px">⬢ 0</b><span style="width:32px;height:32px;background:#0af;border-radius:50%;display:flex;align-items:center;justify-content:center">+</span><span style="margin-left:auto">⚙️</span></div></div>
+<div style="height:380px;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0.15"><div style="font-size:120px">⬢</div><div style="margin-top:20px;color:#666;font-size:14px;letter-spacing:2px">EMPTY LAND</div></div>
+<div style="padding:0 24px"><button style="width:100%;background:#fff;color:#000;font-weight:900;padding:16px;border-radius:16px;font-size:18px;border:none">⬢ Start Build</button></div>
+</div>
+
+<div style="position:fixed;bottom:0;left:0;right:0;max-width:420px;margin:0 auto;background:#0a0a0a;border-top:1px solid #222;display:flex;justify-content:space-around;padding:12px 0">
+<button onclick="wallet.style.display='none';build.style.display='block'" style="background:none;border:none;color:#888">Build</button>
+<button style="background:none;border:none;color:#888">Bag</button>
+<button style="background:none;border:none;color:#888">Market</button>
+<button style="background:none;border:none;color:#888">Earn</button>
+<button style="background:none;border:none;color:#888">Friends</button>
+<button onclick="build.style.display='none';wallet.style.display='block'" style="background:none;border:none;color:#fff">Wallet</button>
+</div>
+
+<script>
+async function updateTON(){
+ try{
+  let r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd&include_24hr_change=true');
+  let d = await r.json();
+  let price = d['the-open-network'].usd;
+  let change = d['the-open-network'].usd_24h_change;
+  let el = document.getElementById('ton-price');
+  let color = change >=0 ? '#0f0' : '#f55';
+  let arrow = change >=0 ? '▲' : '▼';
+  el.innerHTML = '$' + price.toFixed(3) + ' <span style="color:'+color+'">'+arrow+' '+Math.abs(change).toFixed(2)+'%</span>';
+  el.style.color = color;
+ }catch(e){
+  document.getElementById('ton-price').innerHTML = '$3.245 <span style="color:#0f0">LIVE</span>';
+ }
+}
+updateTON();
+setInterval(updateTON, 30000);
+</script>
+
+</body>
+</html># voxelgame
