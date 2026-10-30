@@ -2,44 +2,90 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>VOXEL - My Game</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voxel World</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
+body{background:#0a0e1a;color:#fff;overflow:hidden}
+.top{padding:12px;background:#111a2e;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #00ff88}
+.balance{background:#000;padding:6px 12px;border-radius:20px;border:1px solid #00ff88}
+.grid{width:100%;height:60vh;background:#0f1a30;display:grid;grid-template-columns:repeat(6,1fr);gap:4px;padding:10px;overflow:auto}
+.cell{background:#1a2a4a;border-radius:6px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;border:1px solid #223}
+.cell:hover{background:#223a5a}
+.bottom{position:fixed;bottom:0;width:100%;background:#111a2e;display:flex;justify-content:space-around;padding:10px 0;border-top:2px solid #00ff88}
+.bnav{color:#888;text-align:center;font-size:12px;cursor:pointer}
+.bnav.active{color:#00ff88}
+.build-panel{position:fixed;bottom:70px;left:5%;width:90%;background:#1a2a4a;border-radius:12px;padding:12px;border:2px solid #00ff88;display:none}
+.build-item{display:flex;justify-content:space-between;background:#0f1a30;padding:10px;border-radius:8px;margin:5px 0;cursor:pointer}
+.btn{background:#00ff88;color:#000;border:0;padding:12px 24px;border-radius:20px;font-weight:bold;cursor:pointer;width:100%;margin-top:10px}
+</style>
 </head>
-<body style="background:#000;color:#fff;max-width:420px;margin:0 auto;font-family:sans-serif;padding-bottom:80px">
-<div id="wallet">
-<div style="background:radial-gradient(ellipse at top,#2a1a4a 0%,#000 70%);padding:30px 20px;text-align:center">
-<div style="font-size:56px;font-weight:900"><span style="color:#555">$</span>0.00</div>
-<div style="display:flex;justify-content:space-between;margin-top:28px">
-<div style="text-align:center"><div style="width:56px;height:56px;background:#1a1a1a;border-radius:50%;display:flex;align-items:center;justify-content:center">↓</div><div style="font-size:11px;margin-top:6px;color:#aaa">Deposit</div></div>
-<div style="text-align:center"><div style="width:56px;height:56px;background:#1a1a1a;border-radius:50%;display:flex;align-items:center;justify-content:center">↑</div><div style="font-size:11px;margin-top:6px;color:#aaa">Withdraw</div></div>
-<div style="text-align:center"><div style="width:56px;height:56px;background:#1a1a1a;border-radius:50%;display:flex;align-items:center;justify-content:center">⇄</div><div style="font-size:11px;margin-top:6px;color:#aaa">Exchange</div></div>
-<div style="text-align:center"><div style="width:56px;height:56px;background:#1a1a1a;border-radius:50%;display:flex;align-items:center;justify-content:center">🕐</div><div style="font-size:11px;margin-top:6px;color:#aaa">History</div></div>
+<body>
+<div class="top">
+<div><b>VOXEL WORLD</b> <small style="color:#00ff88">PHASE 1</small></div>
+<div class="balance">💎 <span id="coins">0</span> VOXEL</div>
 </div>
+<div class="grid" id="grid"></div>
+<div class="build-panel" id="panel">
+<h3 style="margin-bottom:8px">🏗️ Build Menu</h3>
+<div class="build-item" onclick="selectB('house','🏠',100)"><span>🏠 House - 100</span><span>+1/s</span></div>
+<div class="build-item" onclick="selectB('shop','🏪',250)"><span>🏪 Shop - 250</span><span>+3/s</span></div>
+<div class="build-item" onclick="selectB('tower','🏢',500)"><span>🏢 Tower - 500</span><span>+10/s</span></div>
+<div class="build-item" onclick="selectB('bank','🏦',1000)"><span>🏦 Bank - 1000</span><span>+25/s</span></div>
+<button class="btn" onclick="closePanel()">Close</button>
 </div>
-<div style="padding:20px;display:flex;flex-direction:column;gap:18px">
-<div style="display:flex;justify-content:space-between;align-items:center"><div style="display:flex;gap:12px;align-items:center"><div style="width:40px;height:40px;background:#222;border-radius:10px;display:flex;align-items:center;justify-content:center">⬢</div><div><div style="font-weight:bold">VOXEL</div><div style="font-size:12px;color:#777">0 VOXEL</div></div></div><div style="text-align:right"><div style="font-weight:bold">$0.00</div><div style="font-size:12px;color:#777">$0.000077</div></div></div>
-<div style="display:flex;justify-content:space-between;align-items:center"><div style="display:flex;gap:12px;align-items:center"><div style="width:40px;height:40px;background:#0098EA;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900">T</div><div><div style="font-weight:bold">TON <span style="font-size:9px;background:#0f0;color:#000;padding:2px 5px;border-radius:10px">LIVE</span></div><div style="font-size:12px;color:#777">0 TON</div></div></div><div style="text-align:right"><div style="font-weight:bold">$0.00</div><div id="ton-price" style="font-size:12px;color:#0f0">Loading...</div></div></div>
-<div style="display:flex;justify-content:space-between;align-items:center"><div style="display:flex;gap:12px;align-items:center"><div style="font-size:28px;width:40px;text-align:center">⭐</div><div><div style="font-weight:bold">STARS</div><div style="font-size:12px;color:#777">0 STARS</div></div></div><div style="text-align:right"><div style="font-weight:bold">$0.00</div><div style="font-size:12px;color:#777">$0.013</div></div></div>
-</div>
-</div>
-<div id="build" style="display:none">
-<div style="padding:20px;text-align:center"><div style="background:#a3ff12;color:#000;padding:8px 24px;border-radius:20px;font-weight:900;display:inline-block">PHASE 1 STARTED</div><div style="margin-top:20px;border:1px solid #333;border-radius:30px;padding:12px 18px;display:flex;align-items:center;gap:10px;justify-content:center;background:#111"><span>⭐</span><b style="font-size:22px">⬢ 0</b><span style="width:32px;height:32px;background:#0af;border-radius:50%;display:flex;align-items:center;justify-content:center">+</span><span style="margin-left:auto">⚙️</span></div></div>
-<div style="height:380px;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0.15"><div style="font-size:120px">⬢</div><div style="margin-top:20px;color:#666;font-size:14px">EMPTY LAND</div></div>
-<div style="padding:0 24px"><button style="width:100%;background:#fff;color:#000;font-weight:900;padding:16px;border-radius:16px;font-size:18px;border:none">⬢ Start Build</button></div>
-</div>
-<div style="position:fixed;bottom:0;left:0;right:0;max-width:420px;margin:0 auto;background:#0a0a0a;border-top:1px solid #222;display:flex;justify-content:space-around;padding:12px 0">
-<button onclick="wallet.style.display='none';build.style.display='block'" style="background:none;border:none;color:#888">Build</button>
-<button style="background:none;border:none;color:#888">Bag</button>
-<button style="background:none;border:none;color:#888">Market</button>
-<button style="background:none;border:none;color:#888">Earn</button>
-<button style="background:none;border:none;color:#888">Friends</button>
-<button onclick="build.style.display='none';wallet.style.display='block'" style="background:none;border:none;color:#fff">Wallet</button>
+<div style="padding:10px"><button class="btn" onclick="openPanel()">🏗️ START BUILD</button><p style="text-align:center;margin-top:8px;color:#888;font-size:12px">Select building then click land</p></div>
+<div class="bottom">
+<div class="bnav active">🏗️<br>Build</div>
+<div class="bnav">🎒<br>Bag</div>
+<div class="bnav">🛒<br>Market</div>
+<div class="bnav">💰<br>Earn</div>
+<div class="bnav">👥<br>Friends</div>
 </div>
 <script>
+let coins=parseInt(localStorage.getItem('vx_coins')||'500');
+let selected=null; let income=0;
+let gridData=JSON.parse(localStorage.getItem('vx_grid')||'{}');
 Telegram.WebApp.ready(); Telegram.WebApp.expand();
-async function updateTON(){try{let r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd&include_24hr_change=true');let d=await r.json();let p=d['the-open-network'].usd;let c=d['the-open-network'].usd_24h_change;let el=document.getElementById('ton-price');el.innerHTML='$'+p.toFixed(3)+' <span style="color:'+(c>=0?'#0f0':'#f55')+'">'+(c>=0?'▲':'▼')+' '+Math.abs(c).toFixed(2)+'%</span>';}catch(e){document.getElementById('ton-price').innerHTML='$3.245 LIVE';}}
-updateTON(); setInterval(updateTON,30000);
+function render(){
+document.getElementById('coins').innerText=coins;
+let g=document.getElementById('grid'); g.innerHTML='';
+for(let i=0;i<36;i++){
+let d=document.createElement('div'); d.className='cell';
+if(gridData[i]){d.innerText=gridData[i].icon;}
+else{d.innerText='';}
+d.onclick=()=>place(i);
+g.appendChild(d);
+}
+}
+function openPanel(){document.getElementById('panel').style.display='block';}
+function closePanel(){document.getElementById('panel').style.display='none';}
+function selectB(type,icon,cost){
+if(coins<cost){alert('Not enough VOXEL! Need '+cost);return;}
+selected={type,icon,cost}; closePanel();
+Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+alert('Now click on EMPTY land to build '+type+'!');
+}
+function place(i){
+if(!selected){openPanel();return;}
+if(gridData[i]){alert('Already built here!');return;}
+if(coins<selected.cost){alert('Not enough VOXEL');return;}
+coins-=selected.cost;
+gridData[i]=selected;
+if(selected.type=='house')income+=1;
+if(selected.type=='shop')income+=3;
+if(selected.type=='tower')income+=10;
+if(selected.type=='bank')income+=25;
+localStorage.setItem('vx_coins',coins);
+localStorage.setItem('vx_grid',JSON.stringify(gridData));
+selected=null; render();
+Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+}
+setInterval(()=>{
+if(income>0){coins+=income; localStorage.setItem('vx_coins',coins); document.getElementById('coins').innerText=coins;}
+},1000);
+render();
 </script>
 </body>
 </html>
