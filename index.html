@@ -3,16 +3,45 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Voxel World</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<style>
-body{margin:0;background:#101827;color:white;font-family:Arial}
-header{background:#1b2b43;padding:20px;display:flex;justify-content:space-between}
-h1{font-size:23px;}
-.card{background:#1b2b43;margin:15px;padding:20px;border-radius:15px}
-button{background:#42c486;color:#071b13;border:none;padding:13px 20px;border-radius:10px;font-weight:bold;cursor:pointer}
-#grid{display:grid;grid-template-columns:repeat(10,1fr);gap:3px}
-.cell{background:#344b68;aspect-ratio:1;border-radius:4px;cursor:pointer}
-.cell.active{background:#42c486;}
+<script src="https://telegram.org/js/telegram-web-app.js"></script><style>
+body {
+  margin: 0;
+  background: #101827;
+  color: white;
+  font-family: Arial;
+}
+header {
+  background: #1b2b43;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+h1 {font-size: 23px;}
+.card {
+  background: #1b2b43;
+  margin: 15px;
+  padding: 20px;
+  border-radius: 15px;
+}
+button {
+  background: #42c486;
+  color: #071b13;
+  border: none;
+  padding: 13px 20px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+#grid {
+  display: grid;
+  grid-template-columns: repeat(10,1fr);
+  gap: 3px;
+}
+.cell {
+  background: #344b68;
+  aspect-ratio: 1;
+  border-radius: 4px;
+}
+.cell.active {background: #42c486;}
 </style></head><body><header>
 <h1>🧊 Voxel World</h1>
 <h3>💎 <span id="balance">300</span></h3>
@@ -22,7 +51,7 @@ button{background:#42c486;color:#071b13;border:none;padding:13px 20px;border-rad
 <button onclick="startBuild()">Start Build</button>
 </div><div class="card" id="builder" style="display:none">
 <h2>Build Your World</h2>
-<p>Tap blocks to build. Each block = 1 Voxel</p>
+<p>Tap blocks to build.</p>
 <div id="grid"></div>
 <br>
 <button onclick="saveBuild()">Save Build</button>
@@ -33,9 +62,12 @@ button{background:#42c486;color:#071b13;border:none;padding:13px 20px;border-rad
 <h2>Market</h2>
 <div id="market">No items listed.</div>
 </div><script>
-let voxels = parseInt(localStorage.getItem('vx')||'300');
-let builds = JSON.parse(localStorage.getItem('vx_builds')||'[]');
 
+let voxels = 300;
+let builds = [];
+let grid = [];
+
+const telegram = window.TeleGRAM?.WebApp;
 if (window.Telegram?.WebApp) {
  Telegram.WebApp.ready();
  Telegram.WebApp.expand();
@@ -43,19 +75,18 @@ if (window.Telegram?.WebApp) {
 
 function updateBalance() {
  document.getElementById("balance").innerText = voxels;
- localStorage.setItem('vx', voxels);
- renderBuilds();
 }
 
 function startBuild() {
  document.getElementById("builder").style.display = "block";
  createGrid();
- window.scrollTo(0,300);
 }
 
 function createGrid() {
  let area = document.getElementById("grid");
  area.innerHTML = "";
+ grid = [];
+
  for(let i=0;i<100;i++) {
   let block = document.createElement("div");
   block.className = "cell";
@@ -69,39 +100,45 @@ function createGrid() {
    }
    updateBalance();
   };
+  grid.push(block);
   area.appendChild(block);
  }
 }
 
-function renderBuilds(){
- if(builds.length==0){
-  document.getElementById("myBuilds").innerHTML="No builds yet.";
+function saveBuild() {
+ let count = grid.filter(b => b.classList.contains("active")).length;
+
+ if(count === 0) {
+  alert("Build something first!");
   return;
  }
- document.getElementById("myBuilds").innerHTML =
- builds.map((b,i) => `<p>${b.name} - ${b.blocks} Blocks <button onclick="sellBuild(${i})">Sell</button></p>`).join("");
-}
 
-function saveBuild() {
- let count = document.querySelectorAll('#grid .cell.active').length;
- if(count === 0) { alert("Build something first!"); return; }
- builds.push({name:"Voxel Build "+(builds.length+1),blocks:count});
- localStorage.setItem('vx_builds',JSON.stringify(builds));
- alert("Saved! "+count+" blocks");
- renderBuilds();
+ let build = {
+  name: "Voxel Build " + (builds.length+1),
+  blocks: count
+ };
+
+ builds.push(build);
+
+ document.getElementById("myBuilds").innerHTML =
+ builds.map((b,i) =>
+ `<p>${b.name} - ${b.blocks} Blocks
+ <button onclick="sellBuild(${i})">Sell</button></p>`
+ ).join("");
 }
 
 function sellBuild(i) {
  let build = builds[i];
- document.getElementById("market").innerHTML += `<p>🧊 ${build.name} - ${build.blocks} Blocks</p>`;
- voxels += build.blocks * 2;
+
+ document.getElementById("market").innerHTML +=
+ <p>🧊 ${build.name} - ${build.blocks} Blocks</p>;
+
  builds.splice(i,1);
- localStorage.setItem('vx_builds',JSON.stringify(builds));
- updateBalance();
- alert("Sold for "+(build.blocks*2)+" Voxels!");
+ alert("Listed in Market!");
 }
 
 updateBalance();
-renderBuilds();
+
 </script></body>
 </html>
+  
